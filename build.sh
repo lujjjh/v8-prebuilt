@@ -19,6 +19,6 @@ ninja -C out.gn/x64.release.sample v8_monolith
 
 cd ..
 mkdir build
-cp -r v8/include .
+cp -r v8/include build
 mkdir build/linux
 cp -r v8/out.gn/x64.release.sample/obj/libv8_monolith.a build/linux/libv8.a
