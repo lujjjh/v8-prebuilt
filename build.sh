@@ -16,3 +16,9 @@ sudo apt update && sudo apt remove php7.4-common && sudo apt autoremove
 ./build/install-build-deps.sh
 tools/dev/v8gen.py x64.release.sample
 ninja -C out.gn/x64.release.sample v8_monolith
+
+cd ..
+mkdir build
+cp -r v8/include .
+mkdir build/linux
+cp -r v8/out.gn/x64.release.sample/obj/libv8_monolith.a build/linux/libv8.a

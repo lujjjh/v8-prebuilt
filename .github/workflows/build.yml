@@ -9,3 +9,8 @@ jobs:
         with:
           submodules: recursive
       - run: ./build.sh
+      - name: release
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: release
+          folder: v8/build
