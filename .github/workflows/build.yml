@@ -34,17 +34,23 @@ jobs:
       - name: Fetch V8
         run: |
           COMMIT=`cat .commit` ./fetch.sh
+          mkdir artifact && mv v8/v8/include artifact
       - name: Upload include files
         uses: actions/upload-artifact@v2
         with:
           name: include
-          path: v8/v8/include
+          path: artifact
           retention-days: 1
   build:
     needs: commit
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest]
+        include:
+          - platform: ubuntu-latest
+            dir: linux
+          - platform: macos-latest
+            dir: macos
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -63,14 +69,44 @@ jobs:
         run: sudo apt update && sudo apt remove php7.4-common && sudo apt autoremove && ./v8/v8/build/install-build-deps.sh
       - name: Build V8
         run: ./build.sh
+      - name: Rename static library
+        run: mkdir -p artifact/${{ matrix.dir }} && mv v8/v8/out.gn/release/obj/libv8_monolith.a artifact/${{ matrix.dir }}/libv8.a
       - name: Upload static library
         uses: "actions/upload-artifact@v2"
         with:
           name: libv8-${{ matrix.platform }}
-          path: v8/v8/out.gn/release/obj/libv8_monolith.a
-  # release:
-  #   - name: Push to release
-  #     uses: JamesIves/github-pages-deploy-action@4.1.4
-  #     with:
-  #       branch: release
-  #       folder: v8/build
+          path: artifact
+          retention-days: 1
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - include
+      - build
+    steps:
+      - name: Download .commit
+        uses: actions/download-artifact@v2
+        with:
+          name: commit
+      - name: Download include
+        uses: actions/download-artifact@v2
+        with:
+          name: include
+      - name: Download Linux build
+        uses: actions/download-artifact@v2
+        with:
+          name: libv8-ubuntu-latest
+      - name: Download macOS build
+        uses: actions/download-artifact@v2
+        with:
+          name: libv8-macos-latest
+      - name: Test output
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: output
+          path: .
+          retention-days: 1
+      # - name: Release
+      #   uses: JamesIves/github-pages-deploy-action@4.1.4
+      #   with:
+      #     branch: release
+      #     folder: v8/build
