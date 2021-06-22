@@ -1,18 +1,33 @@
-name: Build v8
+name: Build V8
 on:
   push:
     branches:
       - main
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - run: ./build.sh
-      - name: release
+      - name: Fetch V8
+        run: ./fetch.sh
+      - name: Install build deps
+        if: matrix.platform == 'ubuntu-latest'
+        run: sudo apt update && sudo apt remove php7.4-common && sudo apt autoremove && ./v8/v8/build/install-build-deps.sh
+      - name: Build V8
+        run: ./build.sh
+      - name: Copy static library
+        if: matrix.platform == 'ubuntu-latest'
+        run: mkdir v8/build/linux && cp -r v8/v8/out.gn/x64.release.sample/obj/libv8_monolith.a build/linux/libv8.a
+      - name: Copy static library
+        if: matrix.platform == 'macos-latest'
+        run: mkdir v8/build/darwin && cp -r v8/v8/out.gn/x64.release.sample/obj/libv8_monolith.a build/darwin/libv8.a
+      - name: Push to release
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: release
