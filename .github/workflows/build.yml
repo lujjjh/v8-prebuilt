@@ -66,8 +66,8 @@ jobs:
       - name: Upload static library
         uses: "actions/upload-artifact@v2"
         with:
-          name: libv8-{{ matrix.platform }}
-          path: v8/v8/out.gn/x64.release.sample/obj/libv8_monolith.a
+          name: libv8-${{ matrix.platform }}
+          path: v8/v8/out.gn/release/obj/libv8_monolith.a
   # release:
   #   - name: Push to release
   #     uses: JamesIves/github-pages-deploy-action@4.1.4
