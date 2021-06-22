@@ -31,7 +31,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: commit
-      - name: Fetch include files
+      - name: Fetch V8
         run: |
           COMMIT=`cat .commit` ./fetch.sh
       - name: Upload include files
@@ -40,29 +40,37 @@ jobs:
           name: include
           path: v8/v8/include
           retention-days: 1
-
-  # build:
-  #   strategy:
-  #     matrix:
-  #       platform: [ubuntu-latest, macos-latest]
-  #   runs-on: ${{ matrix.platform }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #       with:
-  #         submodules: recursive
-  #     - name: Install build deps
-  #       if: matrix.platform == 'ubuntu-latest'
-  #       run: sudo apt update && sudo apt remove php7.4-common && sudo apt autoremove && ./v8/v8/build/install-build-deps.sh
-  #     - name: Build V8
-  #       run: ./build.sh
-  #     - name: Copy static library
-  #       if: matrix.platform == 'ubuntu-latest'
-  #       run: mkdir v8/build/linux && cp -r v8/v8/out.gn/x64.release.sample/obj/libv8_monolith.a v8/build/linux/libv8.a
-  #     - name: Copy static library
-  #       if: matrix.platform == 'macos-latest'
-  #       run: mkdir v8/build/darwin && cp -r v8/v8/out.gn/x64.release.sample/obj/libv8_monolith.a v8/build/darwin/libv8.a
-  #     - name: Push to release
-  #       uses: JamesIves/github-pages-deploy-action@4.1.4
-  #       with:
-  #         branch: release
-  #         folder: v8/build
+  build:
+    needs: commit
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Get commit
+        uses: actions/download-artifact@v2
+        with:
+          name: commit
+      - name: Fetch V8
+        run: |
+          COMMIT=`cat .commit` ./fetch.sh
+      - name: Install build deps
+        if: matrix.platform == 'ubuntu-latest'
+        run: sudo apt update && sudo apt remove php7.4-common && sudo apt autoremove && ./v8/v8/build/install-build-deps.sh
+      - name: Build V8
+        run: ./build.sh
+      - name: Upload static library
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: libv8-{{ matrix.platform }}
+          path: v8/v8/out.gn/x64.release.sample/obj/libv8_monolith.a
+  # release:
+  #   - name: Push to release
+  #     uses: JamesIves/github-pages-deploy-action@4.1.4
+  #     with:
+  #       branch: release
+  #       folder: v8/build
