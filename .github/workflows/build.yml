@@ -118,5 +118,5 @@ jobs:
           publish_dir: v8/out
           publish_branch: release
           enable_jekyll: true
-          commit_message: Build ${{ steps.prepare.outputs.VERSION }}
+          full_commit_message: Build ${{ steps.prepare.outputs.VERSION }}
           tag_name: ${{ steps.prepare.outputs.VERSION }}
