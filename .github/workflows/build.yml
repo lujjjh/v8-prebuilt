@@ -83,30 +83,31 @@ jobs:
       - include
       - build
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - name: Download .commit
         uses: actions/download-artifact@v2
         with:
           name: commit
+          path: v8/out/
       - name: Download include
         uses: actions/download-artifact@v2
         with:
           name: include
+          path: v8/out/
       - name: Download Linux build
         uses: actions/download-artifact@v2
         with:
           name: libv8-ubuntu-latest
+          path: v8/out/
       - name: Download macOS build
         uses: actions/download-artifact@v2
         with:
           name: libv8-macos-latest
-      - name: Test output
-        uses: "actions/upload-artifact@v2"
+          path: v8/out/
+      - name: Release
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          name: output
-          path: .
-          retention-days: 1
-      # - name: Release
-      #   uses: JamesIves/github-pages-deploy-action@4.1.4
-      #   with:
-      #     branch: release
-      #     folder: v8/build
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: v8/out
+          publish_branch: release
