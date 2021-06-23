@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Get commit
+      - name: Download .commit
         uses: actions/download-artifact@v2
         with:
           name: commit
@@ -105,9 +105,14 @@ jobs:
         with:
           name: libv8-macos-latest
           path: v8/out/
+      - name: Prepare commit
+        id: prepare_commit
+        run: echo "::set-output name=commit::$(cat v8/out/.commit)"
       - name: Release
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: v8/out
           publish_branch: release
+          enable_jekyll: true
+          commit_message: Build https://chromium.googlesource.com/v8/v8.git/+/${{ steps.prepare_commit.commit }}
