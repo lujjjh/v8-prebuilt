@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 export PATH=$(pwd)/depot_tools:$PATH
+export CCACHE_SLOPPINESS=time_macros
 
 GN_ARGS=$(tr "\n" ' ' <<-EOF
 is_component_build=false
@@ -11,6 +12,7 @@ v8_monolithic=true
 v8_use_external_startup_data=false
 symbol_level=0
 exclude_unwind_tables=true
+cc_wrapper="ccache"
 EOF
 )
 

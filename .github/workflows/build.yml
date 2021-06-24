@@ -67,6 +67,10 @@ jobs:
       - name: Install build deps
         if: matrix.platform == 'ubuntu-latest'
         run: sudo apt update && sudo apt remove php7.4-common && sudo apt autoremove && ./v8/v8/build/install-build-deps.sh
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.platform }}
       - name: Build V8
         run: ./build.sh
       - name: Rename static library
