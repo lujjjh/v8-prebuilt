@@ -115,7 +115,14 @@ jobs:
           VERSION=$(git ls-remote -q --tags https://chromium.googlesource.com/v8/v8.git | grep $(cat v8/out/.commit) | awk '{ print $2 }' | awk -F/ '{ print $3 }')
           echo $VERSION
           echo "::set-output name=VERSION::$VERSION"
+          if git rev-parse $VERSION > /dev/null 2>&1; then
+            echo tag $VERSION already exists
+            echo ::set-output name=SKIP_RELEASE::true
+          else
+            echo ::set-output name=SKIP_RELEASE::false
+          fi
       - name: Release
+        if: ${{ !fromJSON(steps.prepare.outputs.SKIP_RELEASE) }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
