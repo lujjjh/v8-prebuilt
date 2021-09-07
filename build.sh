@@ -18,5 +18,10 @@ EOF
 
 cd v8/v8
 
+# Fix macOS build
+[[ $OSTYPE == 'darwin'* ]] && sed -i '' '13i\
+#include <utility>
+' include/cppgc/allocation.h
+
 gn gen out.gn/release --args="$GN_ARGS"
 ninja -C out.gn/release v8_monolith
