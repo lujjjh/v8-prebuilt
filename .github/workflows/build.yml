@@ -122,14 +122,15 @@ jobs:
             echo ::set-output name=SKIP_RELEASE::true
           else
             echo ::set-output name=SKIP_RELEASE::false
+            cd v8/out
+            zip -r linux.zip include linux
+            zip -r macos.zip include macos
           fi
       - name: Release
         if: ${{ !fromJSON(steps.prepare.outputs.SKIP_RELEASE) }}
-        uses: peaceiris/actions-gh-pages@v3
+        uses: softprops/action-gh-release@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: v8/out
-          publish_branch: release
-          enable_jekyll: true
-          full_commit_message: Build ${{ steps.prepare.outputs.VERSION }}
           tag_name: ${{ steps.prepare.outputs.VERSION }}
+          files: |
+            v8/out/linux.zip
+            v8/out/macos.zip
