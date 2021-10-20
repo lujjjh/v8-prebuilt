@@ -13,6 +13,7 @@ v8_use_external_startup_data=false
 symbol_level=1
 exclude_unwind_tables=true
 cc_wrapper="ccache"
+treat_warnings_as_errors=false
 EOF
 )
 
